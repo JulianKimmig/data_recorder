@@ -1,5 +1,6 @@
 import os
 import tempfile
+import time
 import unittest
 from random import random
 
@@ -53,29 +54,12 @@ class TimeSeriesDataRecorderTest(unittest.TestCase):
         self.dr.set_resolution(0.2)
         self.dr.data_point(y=2)
         self.dr.set_resolution(0)
+        time.sleep(10**-6)
         assert (self.dr.as_array().shape[1] == 1)
         self.dr.data_point(y=3)
         self.dr.data_point(x=0)
         assert (self.dr.as_array().shape[1] == 3)
-
-        print(self.dr.as_dataframe())
-
-class SpectraRecorder(unittest.TestCase):
-    def setUp(self) -> None:
-        self.source_image = tempfile.mkstemp()[1]
-        self.target_image = tempfile.mkstemp()[1]
-        self.data_recorder = TimeSeriesDataRecorder()
-        self.spectra = None
-
-    def test_generate_spectra(self):
-        self.assertEqual(True, False)
-
-    def test_compare_spectra(self):
-        pass
-
-    def tearDown(self) -> None:
-        os.remove(self.source_image)
-        os.remove(self.target_image)
+        print(self.dr.as_dataframe(as_delta=True,as_date=True))
 
 
 

@@ -1,6 +1,12 @@
 import datetime
 import time
 
+try:
+    timer=time.time_ns
+except:
+    timer=time.time
+
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -31,17 +37,6 @@ class DataRecorder():
         nd = [kwargs.get(l, None) for l in self._lables]
         for i, d in enumerate(nd):
             self._data[i].append(d)
-
-    def as_dataframe(self,cols=None):
-        if cols is None:
-            columns=self._lables if len(self._lables) > 0 else None
-        else:
-            columns = [self._lables[i] for i in self.label_to_col_index(cols)]
-        return pd.DataFrame(self.as_array(cols=cols).T,columns=columns)
-
-    def as_array(self,cols=None):
-        return np.array(self._get_subdata(cols=cols))
-        
 
     def plot2d(self, target_file=None, x=None, y=None,with_labels=True):
 
@@ -87,6 +82,16 @@ class DataRecorder():
 
     def raw_data(self,cols=None):
         return self._get_subdata(cols)
+
+    def as_dataframe(self,cols=None):
+        if cols is None:
+            columns=self._lables if len(self._lables) > 0 else None
+        else:
+            columns = [self._lables[i] for i in self.label_to_col_index(cols)]
+        return pd.DataFrame(self.as_array(cols=cols).T,columns=columns)
+
+    def as_array(self,cols=None):
+        return np.array(self._get_subdata(cols=cols))
 
     def get_indexes(self, **kwargs):
         keys = list(kwargs.keys())
@@ -137,11 +142,11 @@ class TimeSeriesDataRecorder(DataRecorder):
         self._last_record_time = None
         self._resolution = 10**-3
         self.set_resolution(resolution)
-        self._last_t = np.datetime64(datetime.datetime.min)
+        self._last_t = -np.inf
 
     def start_timer(self):
         assert self._start_time == None, "timer already running"
-        self._start_time = np.datetime64(pd.Timestamp(time.time()))
+        self._start_time = timer()
 
     def get_start_time(self):
         return self._start_time
@@ -152,9 +157,29 @@ class TimeSeriesDataRecorder(DataRecorder):
     def data_point(self, **kwargs):
         if not self._start_time:
             self.start_timer()
-        t=np.datetime64(pd.Timestamp(time.time_ns(),unit="ns"))
-        if (t-self._last_t).item().total_seconds() >= self._resolution:
+        t=timer()
+        if (t-self._last_t) >= self._resolution:
             super().data_point(time=t,**kwargs)
             self._last_t = t
         else:
             self.insert_at_index(**kwargs)
+
+    def as_dataframe(self,cols=None,as_delta=False,as_date=True):
+        if cols is None:
+            columns=self._lables if len(self._lables) > 0 else None
+        else:
+            columns = [self._lables[i] for i in self.label_to_col_index(cols)]
+        n = self.as_array(cols=cols,as_delta=as_delta)
+
+        if as_date:
+            if as_delta:
+                n[0] = np.array([pd.Timedelta(xi, unit='s') for xi in n[0]])
+            else:
+                n[0] = np.array([pd.Timestamp(xi, unit='s') for xi in n[0]])
+        return pd.DataFrame(n.T,columns=columns)
+
+    def as_array(self,cols=None,as_delta=False):
+        n = super().as_array(cols=cols)
+        if as_delta:
+            n[0]=n[0]-self._start_time
+        return n

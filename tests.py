@@ -1,13 +1,9 @@
-import datetime
 import os
 import tempfile
-import time
 import unittest
 from random import random
 
 import numpy
-import pandas
-from PIL import Image
 
 from datarecorder import TimeSeriesDataRecorder, DataRecorder
 
@@ -76,11 +72,6 @@ class SpectraRecorder(unittest.TestCase):
 
     def test_compare_spectra(self):
         pass
-
-    def test_spectra_compare_images(self):
-        pic1 = numpy.asarray(Image.open(self.source_image))
-        pic2 = numpy.asarray(Image.open(self.target_image))
-        print(pic1,pic2)
 
     def tearDown(self) -> None:
         os.remove(self.source_image)

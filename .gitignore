@@ -1,4 +1,4 @@
-# Created by .ignore support plugin (hsz.mobi)
+
 __pycache__/
 *.py[cod]
 *$py.class
@@ -72,6 +72,18 @@ venv.bak/
 .dmypy.json
 dmypy.json
 .pyre/
+*.class
+*.log
+*.ctxt
+.mtj.tmp/
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+hs_err_pid*
 .idea/**/workspace.xml
 .idea/**/tasks.xml
 .idea/**/usage.statistics.xml
@@ -104,6 +116,10 @@ fabric.properties
 */.ipynb_checkpoints/*
 profile_default/
 ipython_config.py
+.idea
+*.iml
+out
+gen
 .Python
 [Bb]in
 [Ii]nclude
@@ -114,6 +130,3 @@ ipython_config.py
 pyvenv.cfg
 .venv
 pip-selfcheck.json
-
-
-

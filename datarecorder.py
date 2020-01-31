@@ -259,8 +259,8 @@ class DataRecorder():
     def reset(self):
         self._start_time = timer()
         time.sleep(0.1)
-        self._filename = f"{self._basename}_{pd.Timestamp(self._start_time, unit=time_unit).strftime(
-            '%Y_%m_%d_%H_%M_%S_%f')}__{{time}}.{{format}}"
+        timestamp = pd.Timestamp(self._start_time, unit=time_unit).strftime('%Y_%m_%d_%H_%M_%S_%f')
+        self._filename = f"{self._basename}_{timestamp}__{{time}}.{{format}}"
         self._data = []
         self._labels = []
         self._current_index = -1

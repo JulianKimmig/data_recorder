@@ -128,7 +128,7 @@ class TimeSeriesDataRecorderTest(unittest.TestCase):
         self.dr.data_point(y=2)
         self.dr.set_resolution(0)
         time.sleep(10**-6)
-        assert (self.dr.as_array().shape[1] == 1)
+        assert (self.dr.as_array().shape[1] == 1), f"{self.dr.as_array()}"
         self.dr.data_point(y=3)
         self.dr.data_point(x=0)
         assert (self.dr.as_array().shape[1] == 3)

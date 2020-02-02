@@ -24,14 +24,16 @@ class SimpleDataRecorderTest(unittest.TestCase):
         print(self.dr.as_dataframe(cols=[1,"c","z",1]))
 
     def test_get_numpy(self):
-        self.dr.sort(index=0)
+        self.dr.sort(index="x")
         assert numpy.all(self.dr.as_array(cols=["x","y"])==numpy.array([[x,x*x] for x in range(10)]).T)
 
     def test_sort(self):
         nd = self.dr.sort(index=0,inplace=False)
         assert len(nd) == len(self.dr.raw_data()) and len(nd[0]) == len(self.dr.raw_data()[0])
         assert numpy.array_equal(numpy.array(nd)[0],self.dr.as_array()[0][numpy.argsort(self.dr.as_array()[0])])
-
+        nd = self.dr.sort(index="x",inplace=False)
+        assert len(nd) == len(self.dr.raw_data()) and len(nd[0]) == len(self.dr.raw_data()[0])
+        assert numpy.array_equal(numpy.array(nd)[0],self.dr.as_array()[0][numpy.argsort(self.dr.as_array()[0])])
     def test_find_near(self):
         assert self.dr.get_nearest(c=10) == list(range(10))
         assert self.dr.get_nearest(x=3.4,y=15) == [2]
@@ -91,14 +93,14 @@ class SimpleDataRecorderTest(unittest.TestCase):
             os.remove(f)
 
     def test_split_saving(self):
-        self.dr.sort(0)
+        self.dr.sort("x")
         globsearch = os.path.join(self.dr._folder, f"{self.dr._basename}_*.csv")
         self.dr.saving_rules(max_lines=5)
         for i in range(10):
             self.dr.data_point(x=i + 10)
         files = list(filter(os.path.isfile, glob.glob(globsearch)))
         assert len(files) == 3, f"{len(files)} files found"
-        assert len(self.dr.as_dataframe()) == 20
+        assert len(self.dr.as_dataframe()) == 20, f"dataframe len is {len(self.dr.as_dataframe())}"
         self.dr.saving_rules(keep_lines=1)
         for i in range(10):
             self.dr.data_point(x=i + 20)
@@ -114,7 +116,7 @@ class SimpleDataRecorderTest(unittest.TestCase):
         df.reset_index(drop=True)
         arang = numpy.arange(31)
         arang[-1] = 29
-        assert all(df["x"].values.astype(int) == arang)
+        assert all(df["x"].values.astype(int) == arang), df["x"]
 
 class TimeSeriesDataRecorderTest(unittest.TestCase):
     def setUp(self) -> None:

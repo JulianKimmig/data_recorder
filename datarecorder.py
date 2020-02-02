@@ -25,7 +25,7 @@ class DataRecorder():
         self._backup_min_data = 1
         self._backup_max_data = 200
         self._backupcount = 2
-        self._save_rules_max_lines = 10
+        self._save_rules_max_lines = 10**4
         self._save_rules_keep_lines = int(self._save_rules_max_lines / 2)
 
 
@@ -94,6 +94,7 @@ class DataRecorder():
 
     def sort(self, index, inplace=True):
         np_data=self.as_array()
+        index = self.label_to_col_index([index])[0]
         indexes = np.argsort(self._data[index])
         nd=np_data[:,indexes].tolist()
         if inplace:

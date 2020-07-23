@@ -8,7 +8,7 @@ from random import random
 import numpy
 import pandas
 
-from datarecorder import TimeSeriesDataRecorder, DataRecorder
+from data_recorder.datarecorder import TimeSeriesDataRecorder, DataRecorder
 
 
 class SimpleDataRecorderTest(unittest.TestCase):
@@ -63,6 +63,7 @@ class SimpleDataRecorderTest(unittest.TestCase):
             os.remove(f)
         for i in range(10):
             self.dr.data_point(b=1)
+        print(os.listdir(self.dr._folder))
         files = list(filter(os.path.isfile, glob.glob(globsearch)))
         assert len(files) == 10, f"{len(files)} files found"
         for f in files:
@@ -98,25 +99,31 @@ class SimpleDataRecorderTest(unittest.TestCase):
         self.dr.saving_rules(max_lines=5)
         for i in range(10):
             self.dr.data_point(x=i + 10)
+        print(self.dr._folder)
+        print(os.listdir(self.dr._folder))
         files = list(filter(os.path.isfile, glob.glob(globsearch)))
-        assert len(files) == 3, f"{len(files)} files found"
+        assert len(files) == 1, f"{len(files)} files found"
         assert len(self.dr.as_dataframe()) == 20, f"dataframe len is {len(self.dr.as_dataframe())}"
-        self.dr.saving_rules(keep_lines=1)
+        self.dr.reset()
         for i in range(10):
             self.dr.data_point(x=i + 20)
         files = list(filter(os.path.isfile, glob.glob(globsearch)))
-        assert len(files) == 5, f"{len(files)} files found"
-        assert len(self.dr.as_dataframe()) == 1
-        self.dr.save(full=True)
+        assert len(files) == 2, f"{len(files)} files found"
+        assert len(self.dr.as_dataframe()) == 10,(self.dr.as_dataframe(),len(self.dr.as_dataframe()))
+        self.dr.reset()
+        self.dr.save(only_if_data=False)
         files = list(filter(os.path.isfile, glob.glob(globsearch)))
-        assert len(files) == 6, f"{len(files)} files found"
+        assert len(files) == 3, f"{len(files)} files found"
+        self.dr.data_point(x=1)
+        self.dr.save()
+        assert len(files) == 3, f"{len(files)} files found"
         df = pandas.DataFrame()
-        for f in files:
+        for f in sorted(files):
             df = pandas.concat([df, pandas.read_csv(f)])
         df.reset_index(drop=True)
         arang = numpy.arange(31)
-        arang[-1] = 29
-        assert all(df["x"].values.astype(int) == arang), df["x"]
+        arang[-1] = 1
+        assert all(df["x"].values.astype(int) == arang), (df["x"],arang)
 
 class TimeSeriesDataRecorderTest(unittest.TestCase):
     def setUp(self) -> None:
@@ -128,6 +135,7 @@ class TimeSeriesDataRecorderTest(unittest.TestCase):
         self.dr.data_point(y=2)
         self.dr.set_resolution(0)
         time.sleep(10**-6)
+        print(self.dr.as_array().shape)
         assert (self.dr.as_array().shape[1] == 1), f"{self.dr.as_array()}"
         self.dr.data_point(y=3)
         self.dr.data_point(x=0)
@@ -144,7 +152,7 @@ class TimeSeriesDataRecorderTest(unittest.TestCase):
             start = time.time()
             for j in range(10 ** i):
                 self.dr.data_point(x=j, i=i)
-            self.dr.save(full=True)
+            self.dr.save()
             print(time.time() - start)
 
         for i in range(5):
@@ -152,7 +160,7 @@ class TimeSeriesDataRecorderTest(unittest.TestCase):
             start = time.time()
             for j in range(10 ** i):
                 self.dr.data_point(x=j, i=i, **{f"dp_{x}": x for x in range(10 ** 3)})
-            self.dr.save(full=True)
+            self.dr.save()
             print(time.time() - start)
 
 if __name__ == '__main__':

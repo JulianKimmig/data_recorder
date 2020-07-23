@@ -130,3 +130,4 @@ gen
 pyvenv.cfg
 .venv
 pip-selfcheck.json
+upload_to_pypi.py

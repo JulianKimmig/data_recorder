@@ -38,9 +38,6 @@ class SimpleDataRecorderTest(unittest.TestCase):
         assert self.dr.get_nearest(c=10) == list(range(10))
         assert self.dr.get_nearest(x=3.4,y=15) == [2]
 
-    def test_get_image(self):
-        self.dr.sort(index=0,inplace=True)
-        self.dr.plot2d()#.show()
 
     def test_insert_at_specific_point(self):
         assert self.dr.get_indexes(c=10,x=2) == [1]

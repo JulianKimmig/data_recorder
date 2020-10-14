@@ -58,40 +58,6 @@ class DataRecorder():
         self._check_backup()
         self._check_save()
 
-    def plot2d(self, target_file=None, x=None, y=None, with_labels=True):
-
-        if y is None:
-            y = [i for i in range(len(self._labels))]
-
-        assert len(y) > 0, "Nothing to plot"
-
-        if x is not None:
-            if isinstance(x, int):
-                assert x < len(self._labels), f"x: {x} not in the range of labels"
-                xi = x
-            else:
-                assert x in self._labels, f"x: {x} is not in labels"
-                xi = self._labels.index(x)
-
-            x_label = self._labels[xi]
-            x = self._data[xi]
-
-        else:
-            x = np.arange(len(self._data[0]))
-            x_label = "data point #"
-
-        y = self.label_to_col_index(y)
-
-        for i in y:
-            plt.plot(x, self._data[i], label=self._labels[i])
-        if with_labels:
-            plt.xlabel(x_label)
-            plt.legend()
-
-        if target_file:
-            plt.savefig(target_file)
-        return plt
-
     def sort(self, index, inplace=True):
         np_data = self.as_array()
         index = self.label_to_col_index([index])[0]
@@ -325,13 +291,6 @@ class TimeSeriesDataRecorder(DataRecorder):
             raise e
         return n
 
-    def plot2d(self, x=None, y=None, **kwargs):
-        if x is None:
-            x = "time"
-
-        if y is None:
-            y = [i for i, l in enumerate(self._labels) if l != "time"]
-        return super().plot2d(x=x, y=y, **kwargs)
 
     def _sort_columns(self):
         l, d = zip(*sorted(zip(self._labels[1:], self._data[1:])))

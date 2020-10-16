@@ -160,5 +160,20 @@ class TimeSeriesDataRecorderTest(unittest.TestCase):
             self.dr.save()
             print(time.time() - start)
 
+    def test_datapoints(self):
+        x = numpy.arange(100)
+        y = numpy.random.random(100)
+
+        values = x,y
+        table = "toy18"
+        names=["nm", "abs"]
+        size = min(*[len(v) for v in values])
+
+        if size > 0:
+            print("datapoints: {}, size: {}, names:{}".format(table, size, names))
+            values = [v[:size] for v in values]
+            self.dr.data_points(**dict(zip(names, values)))
+        assert len(self.dr.as_dataframe()) == 100
+        print(self.dr.as_dataframe())
 if __name__ == '__main__':
     unittest.main()

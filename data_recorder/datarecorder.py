@@ -5,15 +5,14 @@ import time
 try:
     timer = time.time_ns
     time_unit = "ns"
-    res_fac=10**9
+    res_fac = 10 ** 9
 except:
     timer = time.time
     time_unit = "s"
-    res_fac=1
+    res_fac = 1
 
 import numpy as np
 import pandas as pd
-
 
 
 class DataRecorder():
@@ -124,8 +123,8 @@ class DataRecorder():
         dist = np.linalg.norm(a - dataa, axis=0)
         return np.where(dist == dist.min())[0].tolist()
 
-    def save(self, path=None,only_if_data=True):
-        if len(self._data)>0:
+    def save(self, path=None, only_if_data=True):
+        if len(self._data) > 0:
             self._save_rules_last_save_line = len(self._data[0])
         else:
             self._save_rules_last_save_line = 0
@@ -180,7 +179,7 @@ class DataRecorder():
         self._check_backup()
 
     def create_backup(self):
-        path=os.path.join(self._folder, self._filename.format(
+        path = os.path.join(self._folder, self._filename.format(
             time=pd.Timestamp(timer(), unit=time_unit).strftime('%Y_%m_%d_%H_%M_%S_%f'), format="bu"))
 
         save_df = self.as_dataframe()
@@ -231,7 +230,7 @@ class DataRecorder():
         self._save_rules_last_save_line = 0
         self._last_backup_time = time.time()
         self._last_backup_index = self._current_index
-        self._pre_save_path=None
+        self._pre_save_path = None
 
     def _sort_columns(self):
         l, d = zip(*sorted(zip(self._labels, self._data)))
@@ -258,7 +257,7 @@ class TimeSeriesDataRecorder(DataRecorder):
         return self._start_time
 
     def set_resolution(self, seconds=10 ** -3):
-        self._resolution = seconds*res_fac
+        self._resolution = seconds * res_fac
 
     def data_point(self, **kwargs):
         if not self._start_time:
@@ -266,6 +265,18 @@ class TimeSeriesDataRecorder(DataRecorder):
         t = timer()
         if (t - self._last_t) >= self._resolution:
             super().data_point(time=t, **kwargs)
+            self._last_t = t
+        else:
+            self.insert_at_index(**kwargs)
+
+    def data_points(self, **kwargs):
+        if not self._start_time:
+            self.start_timer()
+        t = timer()
+        size = min(*[len(v) for v in kwargs.values()])
+        if (t - self._last_t) >= self._resolution:
+            for i in range(size):
+                super().data_point(time=t, **{k: v[i] for k, v in kwargs.items()})
             self._last_t = t
         else:
             self.insert_at_index(**kwargs)
@@ -290,7 +301,6 @@ class TimeSeriesDataRecorder(DataRecorder):
         except Exception as e:
             raise e
         return n
-
 
     def _sort_columns(self):
         l, d = zip(*sorted(zip(self._labels[1:], self._data[1:])))
